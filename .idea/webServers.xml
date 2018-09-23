@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="0bfc555a-c1e8-415a-8234-ac2a720c0976" name="Course $4" url="https://github.com/BradPrit09/Course-4-Assignment.git">
+        <fileTransfer host="https://github.com/BradPrit09/Course-4-Assignment.git" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="21" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
