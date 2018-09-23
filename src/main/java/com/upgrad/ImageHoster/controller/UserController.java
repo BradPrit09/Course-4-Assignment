@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+
+import javax.jws.WebParam;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.util.Base64;
+import java.util.HashMap;
 
 
 @Controller
@@ -53,44 +56,63 @@ public class UserController {
      * @param password the password for the created user
      * @param session HTTP session for us to store the created user
      *
-     * @return redircts to the homepage view
+     * @return redirects to the homepage view
      */
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public String signUpUser(@RequestParam("username") String username,
-                             @RequestParam("password") String password,Model mode,
-                               HttpSession session) {
+                             @RequestParam("password") String password,
+                             Model mode,
+                             HttpSession session) {
 
-        // We'll first assign a default photo to the user
+        //We'll  check if the username is present or not
+
         User presentUser = userService.getByName(username);
+        HashMap<String, String> error = new HashMap<String, String>();
         if(presentUser!= null)
         {
-            String error="the username has been previously registered.";
+            error.put("Current User", "The username has been  previously registered!");
             mode.addAttribute("error", error);
             return "users/signup";
 
         }
-        ProfilePhoto photo = new ProfilePhoto();
-        profilePhotoService.save(photo);
+        else{/*create a new user or check the condition*/ }
+        if (username.length() <6 || password.length() <6) //check  the length of the input string
+        {
+            error.put("username", "needs to be minimum 6 characters or longer");
+            error.put("password", "needs to be minimum 6 characters or longer");
+            mode.addAttribute("errors", error);
+        }
+        else { //Creating new user if the user name is long enough
 
-        // it is good security practice to store the hash version of the password
-        // in the database. Therefore, if your a hacker gains access to your
-        // database, the hacker cannot see the password for your users
-        String passwordHash = hashPassword(password);
-        User user = new User(username, passwordHash, photo);
-        userService.register(user);
 
-        // We want to create an "currUser" attribute in the HTTP session, and store the user
-        // as the attribute's value to signify that the user has logged in
-        session.setAttribute("currUser", user);
+            // We'll first assign a default photo to the user
+            ProfilePhoto photo = new ProfilePhoto();
+            profilePhotoService.save(photo);
 
-        return "redirect:/";
+            // it is good security practice to store the hash version of the password
+            // in the database. Therefore, if your a hacker gains access to your
+            // database, the hacker cannot see the password for your users
+
+            String passwordHash = hashPassword(password);
+            User user = new User(username, passwordHash, photo);
+            userService.register(user);
+
+            // We want to create an "currUser" attribute in the HTTP session, and store the user
+            // as the attribute's value to signify that the user has logged in
+            session.setAttribute("currUser", user);
+
+            return "redirect:/";
+        }
+        return "users/signup";
     }
+
+
 
     /**
      * This method render the user signin form
      *
      * @param session HTTP session to check if the user has logged in
-     * @return
+     * @return is redirected to sign in
      */
     @RequestMapping(value = "/signin")
     public String signIn(HttpSession session) {
@@ -180,7 +202,7 @@ public class UserController {
 
      * @return redirect to the home page
      *
-     * @throws IOException
+     * @throws IOException exception is handled
      */
     @RequestMapping(value = "/user/edit_profile", method = RequestMethod.POST)
     public String editUserProfile(@RequestParam("description") String description,
@@ -211,7 +233,7 @@ public class UserController {
      *
      * @return base64 encoding of the file that was passed into this function
      *
-     * @throws IOException
+     * @throws IOException exception is handled
      */
     private String convertUploadedFileToBase64(MultipartFile file) throws IOException {
         return Base64.getEncoder().encodeToString(file.getBytes());
