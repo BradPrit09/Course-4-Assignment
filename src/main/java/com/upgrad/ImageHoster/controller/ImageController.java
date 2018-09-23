@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 
+@SuppressWarnings({"ALL", "SameReturnValue"})
 @Controller
 public class ImageController {
     @Autowired
@@ -105,20 +106,21 @@ public class ImageController {
             Image newImage = new Image(title, description, uploadedImageData, currUser, imageTags);
             imageService.save(newImage);
 
-            return "redirect:/images/" + newImage.getTitle();
+
+            return "redirect:/images/" + newImage.getId(); //alter to get unique ID in URL.
         }
     }
 
     /**
      * This controller shows a specific image
-     * @param title the title of the image that we want to retrieve
+     * @param id the id of the image that we want to retrieve
      * @param model used to pass data to the view for rendering
      *
      * @return view for the image that was requested
      */
-    @RequestMapping("/images/{title}")
-    public String showImage(@PathVariable String title, Model model) {
-        Image image = imageService.getByTitleWithJoin(title);
+    @RequestMapping("/images/{id}")
+    public String showImage(@PathVariable int id, Model model) {
+        Image image = imageService.getById(id);
         image.setNumView(image.getNumView() + 1);
         imageService.update(image);
 
